@@ -140,12 +140,25 @@ function applySnapshot(p){
  else if(p.screen==='results'){showScreen('results');renderResults()}
  else showScreen('lobby');
 }
+
 function renderRole(){
  $('hostSettings').classList.toggle('hidden',!state.isHost);
  $('guestWait').classList.toggle('hidden',state.isHost);
- $('startBtn').disabled=state.players.length<2&&state.online;
- $('roomSub').textContent=state.online?'غرفة متصلة عبر الإنترنت — شارك الكود مع أصحابك':'وضع محلي تجريبي — الغرفة لا تظهر على أجهزة أخرى';
+
+ const canStart =
+  state.isHost &&
+  state.online &&
+  state.players.length >= 2 &&
+  state.players.length <= state.settings.maxPlayers &&
+  !state.round;
+
+ $('startBtn').disabled = !canStart;
+
+ $('roomSub').textContent = state.online
+  ? 'غرفة متصلة عبر الإنترنت — شارك الكود مع أصحابك'
+  : 'وضع محلي تجريبي — الغرفة لا تظهر على أجهزة أخرى';
 }
+
 async function connectRoom(code,create=false){
  if(state.channel){try{await state.supabase?.removeChannel(state.channel)}catch{}state.channel=null}
  state.roomCode=code;state.playerId=crypto.randomUUID?crypto.randomUUID():state.clientNonce+Date.now();state.isHost=create;state.hostId=create?state.playerId:null;
